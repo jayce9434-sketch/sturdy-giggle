@@ -1,0 +1,6 @@
+/* My Singing Dogs V3 – five-island offline shell, cache-on-play orchestra. */
+const CACHE='my-singing-dogs-v3-all-dogs-sing-20261121';
+const SHELL=['./','./index.html','./style.css','./game.js','./audio.js','./score.js','./manifest.webmanifest','./logo.webp','./icon-180.png','./icon-192.png','./icon-512.png','./dog-atlas.webp','./mouth-atlas.webp','./bg-plant.webp','./bg-ice.webp','./bg-wind.webp','./bg-water.webp','./bg-rock.webp'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(async keys=>{await Promise.all(keys.filter(k=>k.startsWith('my-singing-dogs-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()}))});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(async cached=>{if(cached)return cached;try{const res=await fetch(e.request);if(res.ok){const c=await caches.open(CACHE);c.put(e.request,res.clone()).catch(()=>{})}return res}catch(_){if(e.request.mode==='navigate')return(await caches.match('./index.html'))||Response.error();return Response.error()}}))});
